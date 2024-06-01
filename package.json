@@ -12,6 +12,7 @@
   "dependencies": {
     "@types/node": "^18.0.6",
     "axios": "^1.7.2",
+    "fca-liane-utils": "^1.2.6",
     "ws": "^8.17.0"
   }
 }
