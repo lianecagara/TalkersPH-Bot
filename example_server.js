@@ -1,36 +1,35 @@
 const WebSocket = require("ws");
-const express = require("express");
-const LiaMongo = require("lia-mongo");
 const http = require("http");
 
 const PORT = process.env.PORT || 8080;
 
-const client = new LiaMongo({
-  uri: process.env.MONGO_URI,
-  collection: "chat.chatThread",
+const server = http.createServer();
+
+const wss = new WebSocket.Server({ server });
+
+server.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
-
-const app = express();
-const server = http.createServer(app);
-
-const wss = new WebSocket.Server({ noServer: true });
 
 const users = new Map();
 
-wss.on("connection", async (socket) => {
-  await client.start();
+wss.on("connection", (socket) => {
   socket.on("message", (message) => {
-    const data = JSON.parse(message);
+    try {
+      const data = JSON.parse(message);
 
-    switch (data.type) {
-      case "login":
-        handleLogin(socket, data);
-        break;
-      case "message":
-        handleMessage(socket, data);
-        break;
-      default:
-        console.error("Unknown message type:", data.type);
+      switch (data.type) {
+        case "login":
+          handleLogin(socket, data);
+          break;
+        case "message":
+          handleMessage(socket, data);
+          break;
+        default:
+          console.error("Unknown message type:", data.type);
+      }
+    } catch (error) {
+      console.error("Error parsing message:", error);
     }
   });
 
@@ -39,42 +38,23 @@ wss.on("connection", async (socket) => {
   });
 });
 
-async function handleLogin(socket, { username }) {
+function handleLogin(socket, { username }) {
   if (users.has(username)) {
     socket.send(
-      JSON.stringify({ type: "error", message: "Username already taken" }),
+      JSON.stringify({ type: "error", message: "Username already taken" })
     );
     return;
   }
   users.set(username, socket);
 }
 
-async function updateHistory(username, text) {
-  try {
-    let messages = await client.get("messages");
-    if (!Array.isArray(messages)) {
-      messages = [];
-    }
-    const info = {
-      username,
-      text,
-      timestamp: Date.now(),
-    };
-    messages.push(info);
-    await client.put("messages", messages);
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-async function handleMessage(socket, { text, username }) {
-  console.log(`Received message from ${username}`, text);
+function handleMessage(socket, { text, username }) {
+  console.log(`Received message from ${username}: ${text}`);
   users.forEach((userSocket, userUsername) => {
     if (userSocket !== socket) {
       userSocket.send(JSON.stringify({ type: "message", username, text }));
     }
   });
-  await updateHistory(username, text);
 
   console.log(`All ${users.size} users received the message.`);
 }
@@ -87,29 +67,3 @@ function handleDisconnect(socket) {
     }
   });
 }
-
-app.get("/api/history", async (req, res) => {
-  try {
-    const messages = await client.get("messages");
-    res.json(messages);
-  } catch (error) {
-    console.error("Error fetching chat history:", error);
-    res.status(500).json({ error: "Failed to fetch chat history" });
-  }
-});
-
-server.on("upgrade", (request, socket, head) => {
-  const pathname = request.url;
-
-  if (pathname === "/ws-url") {
-    wss.handleUpgrade(request, socket, head, (ws) => {
-      wss.emit("connection", ws, request);
-    });
-  } else {
-    socket.destroy();
-  }
-});
-
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});

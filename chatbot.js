@@ -16,6 +16,7 @@ class ChatBot {
   }
 
   async init(botName, url) {
+    try {
     this.#botName = botName;
     const i = (url || defaultUrl) + "/ws-url";
     const response = await axios.get(i);
@@ -23,6 +24,9 @@ class ChatBot {
     this.#dataUrl = data.url;
     this.#connectWebSocket(data.url);
     console.log(`Connected to ${this.#dataUrl} as ${botName}`);
+    } catch (error) {
+      console.error(error.stack);
+    }
   }
 
   #connectWebSocket(url) {
@@ -47,7 +51,7 @@ class ChatBot {
     };
 
     this.#ws.onerror = (error) => {
-      console.error("WebSocket error:", error);
+      console.error("WebSocket error:", error.stack);
     };
 
     this.#ws.onclose = () => {
