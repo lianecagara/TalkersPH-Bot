@@ -1,20 +1,20 @@
-const Bot = require("./chatbot");
-const { LianeAPI } = require("fca-liane-utils");
-const bot = new Bot();
-const prefix = '/';
+const { exec } = require("child_process");
 
-bot.init("Jea");
-const jea = new LianeAPI("jea-mean", "lanceajiro");
-bot.listen(async (event) => {
-  console.log(event);
-  /*if (event.body.startsWith('hi')) {
-    bot.sendMessage(`Hello ${event.sender}!`);
-  }*/
-  if (!event.body.startsWith(prefix + 'jea ')) {
-    return;
-  }
-  const message = await jea.ask(`Sabi ni ${event.sender}: ${event.body}`);
-  bot.sendMessage(`Replying to ${event.sender}:
+function runScript(scriptPath, key) {
+  const child = exec(`node ${scriptPath}`, { stdio: "inherit" });
 
-${message}`);
-});
+  child.stdout.on("data", (data) => {
+    console.log(`[ ${key} ] ${data}`);
+  });
+
+  child.stderr.on("data", (data) => {
+    console.error(`[ ${key} ] ${data}`);
+  });
+
+  child.on("close", (code) => {
+    console.log(`${scriptPath} exited with code ${code}`);
+  });
+}
+
+runScript("bot.js", "BOT");
+runScript("example_server.js", "SERVER");
