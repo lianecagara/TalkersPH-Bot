@@ -17,7 +17,8 @@ const wss = new WebSocket.Server({ noServer: true });
 
 const users = new Map();
 
-wss.on("connection", (socket) => {
+wss.on("connection", async (socket) => {
+  await client.start();
   socket.on("message", (message) => {
     const data = JSON.parse(message);
 
@@ -49,17 +50,21 @@ async function handleLogin(socket, { username }) {
 }
 
 async function updateHistory(username, text) {
-  let messages = await client.get("messages");
-  if (!Array.isArray(messages)) {
-    messages = [];
+  try {
+    let messages = await client.get("messages");
+    if (!Array.isArray(messages)) {
+      messages = [];
+    }
+    const info = {
+      username,
+      text,
+      timestamp: Date.now(),
+    };
+    messages.push(info);
+    await client.put("messages", messages);
+  } catch (err) {
+    console.error(err);
   }
-  const info = {
-    username,
-    text,
-    timestamp: Date.now(),
-  };
-  messages.push(info);
-  await client.put("messages", messages);
 }
 
 async function handleMessage(socket, { text, username }) {
@@ -96,7 +101,7 @@ app.get("/api/history", async (req, res) => {
 server.on("upgrade", (request, socket, head) => {
   const pathname = request.url;
 
-  if (pathname === "/api/ws") {
+  if (pathname === "/ws-url") {
     wss.handleUpgrade(request, socket, head, (ws) => {
       wss.emit("connection", ws, request);
     });
