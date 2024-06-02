@@ -16,4 +16,4 @@ function runScript(scriptPath, key, callback) {
     if (callback) callback();
   });
 }
-runScript("bot.js", "BOT");
+runScript("bot.js", "BOT1");

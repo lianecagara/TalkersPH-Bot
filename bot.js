@@ -16,11 +16,11 @@ const mappedStyle = Object.entries(style)
   .map(([key, value]) => `${key}: ${value}`)
   .join(" ");
 
-bot.init(`Jea`, "https://liasparklivechat.onrender.com").then(() => {
+bot.init("💗 Chesca (V1)", "https://liasparklivechat.onrender.com").then(() => {
   //bot.sendMessage("Connected ✅");
 });
 
-const jea = new LianeAPI("jea-mean", "lanceajiro");
+const jea = new LianeAPI("chesca1", "LianeAPI_Reworks");
 
 bot.listen(async (event) => {
   console.log(event);
@@ -42,16 +42,16 @@ bot.listen(async (event) => {
   if (event.body.startsWith("hi")) {
     bot.sendMessage(`Hello ${event.sender}!`, event);
   }
-  if (!event.body.startsWith(prefix + "jea ")) {
+  if (
+    !event.body.includes("chesca") &&
+    event.replyTo?.username !== event.botName
+  ) {
     return;
   }
-  const message = await jea.ask(`Sabi ni ${event.sender}: ${event.body}`);
-  bot.sendMessage(
-    `Replying to ${event.sender}:
-
-${message}`,
-    event,
+  const { raw: message } = await jea.request(
+    `Hi ako si ${event.sender}, ${event.body}`,
   );
+  bot.sendMessage(`${message}`);
 });
 app.use(express.json());
 
@@ -62,5 +62,23 @@ app.post("/sendMessage", (req, res) => {
   } = req;
   bot.sendMessage(text);
 });
-
-app.listen(8080);
+function generatePort() {
+  return Math.floor(Math.random() * (65535 - 1024 + 1)) + 1024;
+}
+function randomName() {
+  const names = [
+    "Jea",
+    "Vedar",
+    "Cassidy",
+    "James",
+    "NTKhang03",
+    "Elon Musk",
+    "Liana",
+    "Bruh",
+  ];
+  return names[Math.floor(Math.random() * names.length)];
+}
+const port = generatePort();
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
