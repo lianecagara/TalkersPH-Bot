@@ -16,11 +16,11 @@ const mappedStyle = Object.entries(style)
   .map(([key, value]) => `${key}: ${value}`)
   .join(" ");
 
-bot.init("Chesca 🇵🇭", "https://liasparklivechat.onrender.com").then(() => {
+bot.init("Hyunjin 🇵🇭", "https://liasparklivechat.onrender.com").then(() => {
   //bot.sendMessage("Connected ✅");
 });
 
-const jea = new LianeAPI("chesca1", "LianeAPI_Reworks");
+const jea = new LianeAPI("hyunjin");
 
 bot.listen(async (event) => {
   console.log(event);
@@ -39,11 +39,11 @@ bot.listen(async (event) => {
       bot.sendMessage(i + 1 + ". " + message);
     }
   }
-  if (event.body.startsWith("hi")) {
-    bot.sendMessage(`Hello ${event.sender}!`, event);
+  if (event.body.includes("love")) {
+    bot.sendMessage(`I love you ${event.sender}!`, event);
   }
   if (
-    !event.body.includes("chesca") &&
+    !event.body.includes("hyunjin") &&
     event.replyTo?.username !== event.botName
   ) {
     return;
