@@ -16,7 +16,7 @@ const mappedStyle = Object.entries(style)
   .map(([key, value]) => `${key}: ${value}`)
   .join(" ");
 
-bot.init("💗 Chesca (V1)", "https://liasparklivechat.onrender.com").then(() => {
+bot.init("Chesca 🇵🇭", "https://liasparklivechat.onrender.com").then(() => {
   //bot.sendMessage("Connected ✅");
 });
 
