@@ -1,5 +1,8 @@
 const Bot = require("./chatbot");
 const { LianeAPI } = require("fca-liane-utils");
+const express = require("express");
+const app = express();
+
 const bot = new Bot();
 const prefix = "/";
 const style = {
@@ -13,7 +16,7 @@ const mappedStyle = Object.entries(style)
   .map(([key, value]) => `${key}: ${value}`)
   .join(" ");
 
-bot.init(`Jea`, 'https://liasparklivechat.onrender.com').then(() => {
+bot.init(`Jea`, "https://liasparklivechat.onrender.com").then(() => {
   //bot.sendMessage("Connected ✅");
 });
 
@@ -32,3 +35,14 @@ bot.listen(async (event) => {
 
 ${message}`);
 });
+app.use(express.json());
+
+app.post("/sendMessage", (req, res) => {
+  res.send(`Done`);
+  const {
+    body: { text },
+  } = req;
+  bot.sendMessage(text);
+});
+
+app.listen(8080);
