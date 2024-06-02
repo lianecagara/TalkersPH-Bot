@@ -24,6 +24,21 @@ const jea = new LianeAPI("jea-mean", "lanceajiro");
 
 bot.listen(async (event) => {
   console.log(event);
+  if (event.body.startsWith("spam")) {
+    const amount = parseInt(event.body.split(" ")[1]);
+    let [, , ...message] = event.body.split(" ");
+    message = message.join(" ");
+    if (!message) {
+      return bot.sendMessage("Missing message after amount.");
+    }
+    if (isNaN(amount) || amount > 20) {
+      return bot.sendMessage("Invalid amount.");
+    }
+    for (let i = 0; i < amount; i++) {
+      await new Promise((r) => setTimeout(r, 500));
+      bot.sendMessage(i + 1 + ". " + message);
+    }
+  }
   if (event.body.startsWith("hi")) {
     bot.sendMessage(`Hello ${event.sender}!`, event);
   }
@@ -31,9 +46,12 @@ bot.listen(async (event) => {
     return;
   }
   const message = await jea.ask(`Sabi ni ${event.sender}: ${event.body}`);
-  bot.sendMessage(`Replying to ${event.sender}:
+  bot.sendMessage(
+    `Replying to ${event.sender}:
 
-${message}`, event);
+${message}`,
+    event,
+  );
 });
 app.use(express.json());
 

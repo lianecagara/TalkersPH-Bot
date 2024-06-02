@@ -83,8 +83,10 @@ class ChatBot {
           isBot: true,
           ...(replyTo
             ? {
-                text: replyTo.body,
-                username: replyTo.sender,
+                replyTo: {
+                  text: replyTo.body,
+                  username: replyTo.sender,
+                },
               }
             : {}),
         }),
