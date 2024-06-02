@@ -74,8 +74,8 @@ class ChatBot {
     this.#messageListener = callback;
   }
   sendMessage(message) {
-    if (this.#ws && message.trim() !== "") {
-      const trimmedMessage = message.trim();
+    if (this.#ws && message?.trim() !== "") {
+      const trimmedMessage = message?.trim();
       this.#ws.send(
         JSON.stringify({ type: "message", text: trimmedMessage, isBot: true }),
       );
