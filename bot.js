@@ -13,8 +13,8 @@ const mappedStyle = Object.entries(style)
   .map(([key, value]) => `${key}: ${value}`)
   .join(" ");
 
-bot.init(`Jea <span style="${mappedStyle}">BOT</span>`).then(() => {
-  bot.sendMessage("Connected ✅");
+bot.init(`Jea`, 'https://liasparklivechat.onrender.com').then(() => {
+  //bot.sendMessage("Connected ✅");
 });
 
 const jea = new LianeAPI("jea-mean", "lanceajiro");
