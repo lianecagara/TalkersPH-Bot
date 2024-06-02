@@ -17,13 +17,13 @@ class ChatBot {
 
   async init(botName, url) {
     try {
-    this.#botName = botName;
-    const i = (url || defaultUrl) + "/ws-url";
-    const response = await axios.get(i);
-    const data = response.data;
-    this.#dataUrl = data.url;
-    this.#connectWebSocket(data.url);
-    console.log(`Connected to ${this.#dataUrl} as ${botName}`);
+      this.#botName = botName;
+      const i = (url || defaultUrl) + "/ws-url";
+      const response = await axios.get(i);
+      const data = response.data;
+      this.#dataUrl = data.url;
+      this.#connectWebSocket(data.url);
+      console.log(`Connected to ${this.#dataUrl} as ${botName}`);
     } catch (error) {
       console.error(error.stack);
     }
@@ -77,7 +77,7 @@ class ChatBot {
     if (this.#ws && message.trim() !== "") {
       const trimmedMessage = message.trim();
       this.#ws.send(
-        JSON.stringify({ type: "message", text: trimmedMessage }),
+        JSON.stringify({ type: "message", text: trimmedMessage, isBot: true }),
       );
       console.log(`Sent response:`, {
         sender: this.#botName,
