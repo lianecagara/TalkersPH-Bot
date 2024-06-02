@@ -73,11 +73,21 @@ class ChatBot {
   listen(callback) {
     this.#messageListener = callback;
   }
-  sendMessage(message) {
+  sendMessage(message, replyTo) {
     if (this.#ws && message?.trim() !== "") {
       const trimmedMessage = message?.trim();
       this.#ws.send(
-        JSON.stringify({ type: "message", text: trimmedMessage, isBot: true }),
+        JSON.stringify({
+          type: "message",
+          text: trimmedMessage,
+          isBot: true,
+          ...(replyTo
+            ? {
+                text: replyTo.body,
+                username: replyTo.sender,
+              }
+            : {}),
+        }),
       );
       console.log(`Sent response:`, {
         sender: this.#botName,
