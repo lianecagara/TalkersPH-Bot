@@ -40,8 +40,23 @@ class ChatBot {
 
     this.#ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
+      console.log(data);
       if (data.type === "login_success") {
         this.#token = data.token;
+      }
+      if (data.type === "message_edit") {
+        const messageBody = data.text;
+        const sender = String(data.username).trim();
+        const eventObject = {
+          ...data,
+          type: data.type,
+          sender,
+          body: messageBody,
+          botName: this.#botName,
+          replyTo: data.replyTo || null,
+          messageID: data.messageID,
+        };
+        this.#handleMessage(eventObject);
       }
 
       if (data.type === "message" || data.type === "message_reply") {

@@ -25,7 +25,11 @@ bot.init(botKey + " 🇵🇭", "https://liasparklivechat.onrender.com").then(() 
 const jea = new LianeAPI(String(botKey).toLowerCase(), botUser);
 
 bot.listen(async (event) => {
-  console.log(event);
+  //console.log(event);
+  if (event.type === "message_edit") {
+    //bot.sendMessage(`Adik mo sa pag edit ha!`, event);
+    return;
+  }
   if (event.body.startsWith("spam")) {
     const amount = parseInt(event.body.split(" ")[1]);
     let [, , ...message] = event.body.split(" ");
