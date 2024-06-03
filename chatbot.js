@@ -8,6 +8,7 @@ class ChatBot {
   #botName;
   #messageListener;
   #dataUrl;
+  #token;
 
   constructor() {
     this.#ws = null;
@@ -38,10 +39,14 @@ class ChatBot {
 
     this.#ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
+      if (data.type === "login_success") {
+        this.#token = data.token;
+      }
       if (data.type === "message" || data.type === "message_reply") {
         const sender = String(data.username).trim();
         const messageBody = data.text;
         const eventObject = {
+          ...data,
           type: data.type,
           sender,
           body: messageBody,
@@ -82,6 +87,7 @@ class ChatBot {
         JSON.stringify({
           type: replyTo ? "message_reply" : "message",
           text: trimmedMessage,
+          token: this.#token,
           isBot: true,
           ...(replyTo
             ? {
