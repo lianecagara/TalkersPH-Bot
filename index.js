@@ -1,7 +1,7 @@
 const { exec } = require("child_process");
 
-function runScript(scriptPath, key, callback) {
-  const child = exec(`node ${scriptPath}`, { stdio: "inherit" });
+function runScript(scriptPath, key, botKey, callback) {
+  const child = exec(`node ${scriptPath} ${key} ${botKey || "unregistered"}`, { stdio: "inherit" });
 
   child.stdout.on("data", (data) => {
     console.log(`[ ${key} ] ${data}`);
@@ -16,4 +16,6 @@ function runScript(scriptPath, key, callback) {
     if (callback) callback();
   });
 }
-runScript("bot.js", "BOT1");
+runScript("bot.js", "Hyunjin");
+runScript("bot.js", "Chesca", "LianeAPI_Reworks");
+runScript("bot.js", "Jea");

@@ -2,6 +2,8 @@ const Bot = require("./chatbot");
 const { LianeAPI } = require("fca-liane-utils");
 const express = require("express");
 const app = express();
+const botKey = process.argv[2];
+const botUser = process.argv[3] || "unregistered";
 
 const bot = new Bot();
 const prefix = "/";
@@ -16,11 +18,11 @@ const mappedStyle = Object.entries(style)
   .map(([key, value]) => `${key}: ${value}`)
   .join(" ");
 
-bot.init("Hyunjin 🇵🇭", "https://liasparklivechat.onrender.com").then(() => {
+bot.init(botKey + " 🇵🇭", "https://liasparklivechat.onrender.com").then(() => {
   //bot.sendMessage("Connected ✅");
 });
 
-const jea = new LianeAPI("hyunjin");
+const jea = new LianeAPI(String(botKey).toLowerCase(), botUser);
 
 bot.listen(async (event) => {
   console.log(event);
@@ -39,12 +41,13 @@ bot.listen(async (event) => {
       bot.sendMessage(i + 1 + ". " + message);
     }
   }
-  if (event.body.includes("love")) {
+  /*if (event.body.includes("love")) {
     bot.sendMessage(`I love you ${event.sender}!`, event);
-  }
+  }*/
   if (
-    !event.body.includes("hyunjin") &&
-    event.replyTo?.username !== event.botName
+    !event.body.includes(botKey) &&
+    event.replyTo?.username !== event.botName &&
+    !event.body.includes("@everyone")
   ) {
     return;
   }
