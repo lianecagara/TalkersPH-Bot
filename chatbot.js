@@ -14,6 +14,7 @@ class ChatBot {
     this.#ws = null;
     this.#botName = null;
     this.#messageListener = null;
+    this.queue = [];
   }
 
   async init(botName, url) {
@@ -42,7 +43,20 @@ class ChatBot {
       if (data.type === "login_success") {
         this.#token = data.token;
       }
+
       if (data.type === "message" || data.type === "message_reply") {
+        if (data.selfSend) {
+          const { queue } = this;
+          const target = queue[queue.length - 1] || {};
+          if (typeof target?.resolve === "function") {
+            target.resolve({
+              ...data,
+              sender: this.#botName,
+              body: data.text,
+            });
+          }
+          return;
+        }
         const sender = String(data.username).trim();
         const messageBody = data.text;
         const eventObject = {
@@ -103,7 +117,20 @@ class ChatBot {
         sender: this.#botName,
         body: trimmedMessage,
       });
+      return new Promise(async (resolve) => {
+        this.queue.push({ resolve, message });
+      });
     }
+  }
+  editMessage(message, messageID) {
+    this.#ws.send(
+      JSON.stringify({
+        text: message,
+        type: "message_edit",
+        messageID,
+        token: this.#token,
+      }),
+    );
   }
 }
 
