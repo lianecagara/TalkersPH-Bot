@@ -51,7 +51,7 @@ bot.listen(async (event) => {
   const { raw: message } = await jea.request(
     `Hi ako si ${event.sender}, ${event.body}`,
   );
-  bot.sendMessage(`${message}`);
+  bot.sendMessage(`${message}`, event);
 });
 app.use(express.json());
 

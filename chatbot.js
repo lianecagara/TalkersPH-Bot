@@ -80,7 +80,7 @@ class ChatBot {
       const trimmedMessage = message?.trim();
       this.#ws.send(
         JSON.stringify({
-          type: "message",
+          type: replyTo ? "message_reply" : "message",
           text: trimmedMessage,
           isBot: true,
           ...(replyTo
