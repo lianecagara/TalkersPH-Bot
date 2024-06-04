@@ -14,6 +14,7 @@ class LLCBot {
     this.token = token ?? null;
     this.onFuncs = {};
     this.queue = [];
+    this.onlineUsers = [];
   }
 
   async startListening(callback) {
@@ -81,6 +82,9 @@ class LLCBot {
     if (event.type === "login_failure") {
       console.log(`Failed to login as ${this.botName}`);
       process.exit();
+    }
+    if (event.type === "online_users") {
+      this.onlineUsers = event.users;
     }
     if (event.username === this.botName) {
       const resolve = this.queue.pop();
