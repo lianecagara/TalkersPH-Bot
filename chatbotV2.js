@@ -40,8 +40,7 @@ class LLCBot {
         this.onFuncs.ws_open(i);
       }
       this.wsSend({
-        type: "command_check",
-        commandName: "/users",
+        type: "presence",
       });
       console.log(`Connected to ${wsUrl} as ${username}`);
     };
@@ -78,7 +77,6 @@ class LLCBot {
 
   async handleListen(info) {
     const event = JSON.parse(info.data);
-    console.log(event);
     if (event.type === "login_failure") {
       console.log(`Failed to login as ${this.botName}`);
       process.exit();
@@ -86,13 +84,15 @@ class LLCBot {
     if (event.type === "online_users") {
       this.onlineUsers = event.users;
     }
-    if (event.username === this.botName) {
-      const resolve = this.queue.pop();
+    if (event.selfSend) {
+      const resolve = this.queue[this.queue.length - 1];
       if (resolve) {
         resolve(event);
+        this.queue.pop();
       }
       return;
     }
+    console.log(event);
     const onFunc = this.onFuncs[event.type];
     if (typeof onFunc === "function") {
       onFunc(event);
@@ -100,8 +100,11 @@ class LLCBot {
     this.#onEvent(event);
   }
 
-  on(type, callback) {
-    this.onFuncs[type] = callback;
+  on(...args) {
+    const [callback, ...types] = args.reverse();
+    for (const type of types) {
+      this.onFuncs[type] = callback;
+    }
   }
 
   onEvent(callback) {
@@ -128,10 +131,10 @@ class LLCBot {
     });
   }
   async animate(text, interval, replyTo) {
-    interval ??= 100;
+    interval ??= 50;
     let resultText = "";
-    const info = await this.sendMessage(text, replyTo);
-    for (const char of text) {
+    const info = await this.sendMessage("", replyTo);
+    for (const char of String(text).split("")) {
       await new Promise((i) => setTimeout(i, interval));
       resultText += char;
       this.editMessage(resultText, info.messageID);
