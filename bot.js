@@ -1,4 +1,4 @@
-const Bot = require("./chatbot");
+const { ChatBot: Bot } = require("./chatbot");
 const { LianeAPI } = require("fca-liane-utils");
 const express = require("express");
 const app = express();

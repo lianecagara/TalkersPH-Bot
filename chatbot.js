@@ -1,7 +1,101 @@
 const WebSocket = require("ws");
 const axios = require("axios");
 
-const defaultUrl = `https://talkersph.replit.app/`;
+const defaultUrl = `https://liasparklivechat.onrender.com/`;
+
+class LLCBot {
+  #onEvent;
+  constructor({ username, url = defaultUrl, token }) {
+    this.ws = null;
+    this.botName = username;
+    this.#onEvent = async function () {};
+    this.url = url;
+    this.token = token ?? null;
+    this.onFuncs = {};
+  }
+  async startListening(callback) {
+    let { token, username, url } = this;
+    if (!token) {
+      try {
+        token = await this.makeToken(username);
+      } catch (error) {
+        console.log(`Failed Getting token:`, error.message);
+        return;
+      }
+    }
+    const { url: wsUrl } = await axios.get(`${url}/ws-url`);
+    this.ws = new WebSocket(wsUrl);
+    const { ws } = this;
+    ws.onopen = (i) => {
+      if (typeof this.onFuncs.ws_open == "function") {
+        this.onFuncs.ws_open(i);
+      }
+      console.log(`Connected to ${wsUrl} as ${username}`);
+    };
+    ws.onmessage = () => this.handleListen();
+    ws.onclose = () => {
+      if (typeof this.onFuncs.ws_close == "function") {
+        this.onFuncs.ws_close(i);
+      }
+      console.log(`Server disconnected, restarting connection.`);
+      this.listen();
+    };
+    this.#onEvent = typeof callback === "function" ? callback : async () => {};
+  }
+  async makeToken(username) {
+    const res = await axios.post(`${this.url}/api/request_access_token`, {
+      username,
+    });
+    const { token, type, message } = res.data;
+    if (type === "fail") {
+      throw new Error(message);
+    } else if (type === "success") {
+      return token;
+    }
+  }
+  async handleListen(info) {
+    const event = JSON.parse(info.data);
+    console.log(event);
+    const onFunc = this.onFuncs[event.type];
+    if (typeof onFunc === "function") {
+      onFunc(event).catch(console.error);
+    }
+    this.#onEvent(event).catch(consple.error);
+  }
+  on(type, callback) {
+    this.onFuncs[type] = callback;
+  }
+  onEvent(callback) {
+    this.#onEvent = callback;
+  }
+  sendMessage(text, replyTo, isNotBot) {
+    this.wsSend({
+      type: "message",
+      text,
+      replyTo,
+      isBot: !!isNotBot,
+    });
+  }
+  editMessage(text, messageID) {
+    
+  }
+
+  isReady() {
+    return this.ws?.readyState === WebSocket.OPEN;
+  }
+  wsSend(data) {
+    if (!this.isReady()) {
+      throw new Error("Connection not ready!");
+    }
+    this.ws?.send(
+      JSON.stringify({
+        ...data,
+        accessToken: this.token,
+        token: this.token,
+      }),
+    );
+  }
+}
 
 class ChatBot {
   #ws;
@@ -149,4 +243,4 @@ class ChatBot {
   }
 }
 
-module.exports = ChatBot;
+module.exports = { ChatBot, LLCBot };

@@ -16,6 +16,7 @@ function runScript(scriptPath, key, botKey, callback) {
     if (callback) callback();
   });
 }
-runScript("bot.js", "Hyunjin");
+/*runScript("bot.js", "Hyunjin");
 runScript("bot.js", "Chesca", "LianeAPI_Reworks");
-runScript("bot.js", "Jea");
+runScript("bot.js", "Jea");*/
+runScript("botV2.js", "Test");
