@@ -1,13 +1,14 @@
 const WebSocket = require("ws");
 const axios = require("axios");
 
-const defaultUrl = `https://liasparklivechat.onrender.com/`;
+const defaultUrl = `https://liasparklivechat.onrender.com`;
 
 class LLCBot {
   #onEvent;
   constructor({ username, url = defaultUrl, token }) {
     this.ws = null;
     this.botName = username;
+    this.username = username;
     this.#onEvent = async function () {};
     this.url = url;
     this.token = token ?? null;
@@ -17,7 +18,7 @@ class LLCBot {
 
   async startListening(callback) {
     let { token, username, url } = this;
-    console.log('Listening started!');
+    console.log("Listening started!");
     if (!token) {
       try {
         token = await this.makeToken(username);
@@ -37,6 +38,10 @@ class LLCBot {
       if (typeof this.onFuncs.ws_open == "function") {
         this.onFuncs.ws_open(i);
       }
+      this.wsSend({
+        type: "command_check",
+        commandName: "/users",
+      });
       console.log(`Connected to ${wsUrl} as ${username}`);
     };
 
@@ -58,8 +63,8 @@ class LLCBot {
 
   async makeToken(username) {
     console.log(`Getting token for ${username}...`);
-    const res = await axios.post(`${this.url}/api/request_access_token`, {
-      username,
+    const res = await axios.get(`${this.url}/api/request_access_token`, {
+      params: { username },
     });
     const { token, type, message } = res.data;
     if (type === "fail") {
@@ -73,6 +78,10 @@ class LLCBot {
   async handleListen(info) {
     const event = JSON.parse(info.data);
     console.log(event);
+    if (event.type === "login_failure") {
+      console.log(`Failed to login as ${this.botName}`);
+      process.exit();
+    }
     if (event.username === this.botName) {
       const resolve = this.queue.pop();
       if (resolve) {
@@ -82,9 +91,9 @@ class LLCBot {
     }
     const onFunc = this.onFuncs[event.type];
     if (typeof onFunc === "function") {
-      onFunc(event).catch(console.error);
+      onFunc(event);
     }
-    this.#onEvent(event).catch(console.error);
+    this.#onEvent(event);
   }
 
   on(type, callback) {
@@ -218,6 +227,7 @@ class LLCBot {
         ...data,
         accessToken: this.token,
         token: this.token,
+        isOfficialBot: true,
       }),
     );
   }
