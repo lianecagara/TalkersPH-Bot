@@ -166,7 +166,7 @@ module.exports = {
   },
   onStart() {},
   async onChat({ event }) {
-    let i = event.body.startsWith("!");
+    let i = true;
     switch (event.type) {
       case "message":
         if (i) {
